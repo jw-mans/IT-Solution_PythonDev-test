@@ -1,0 +1,215 @@
+/* styles.css */
+
+/* Reset defaults */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Общие стили для body */
+body {
+    min-height: 100vh;
+    color: #333;
+}
+
+/* Контейнер для всех страниц */
+.container {
+    text-align: center;
+    padding: 50px 40px;
+    border-radius: 25px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    max-width: 700px;
+    width: 90%;
+    background: rgba(255, 255, 255, 0.9);
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* Заголовки */
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #1a1a2e;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Цитаты */
+.quote, .quote-text {
+    font-size: 1.5rem;
+    font-style: italic;
+    margin: 20px 0;
+    position: relative;
+    color: #162447;
+}
+
+.quote::before,
+.quote::after,
+.quote-text::before,
+.quote-text::after {
+    content: '"';
+    font-size: 2rem;
+    color: #1f4068;
+}
+
+/* Источник цитаты */
+.source, .quote-source {
+    margin-top: 15px;
+    font-size: 1.2rem;
+    color: #1f4068;
+    font-weight: 600;
+}
+
+/* Статистика (только для top.html) */
+.quote-stats, .stats {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #444;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.stat {
+    background: #f3f4f6;
+    padding: 5px 12px;
+    border-radius: 12px;
+}
+
+/* Кнопки */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px; /* иконка + цифра */
+    margin-top: 10px;
+    margin-right: 10px;
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff758c, #ff7eb3);
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    font-size: 1rem;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* Ссылки с кнопками */
+a.btn-link {
+    text-decoration: none;
+    display: inline-block;
+}
+
+/* Ссылки "назад" */
+.back-link {
+    margin-top: 25px;
+    display: inline-block;
+    text-decoration: none;
+    color: #ff4e50;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.back-link:hover {
+    color: #ff1a1a;
+}
+
+/* Формы (add.html) */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #ff4e50;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 15px;
+    border: 2px solid #ff7b54;
+    outline: none;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus, textarea:focus {
+    border-color: #ff4e50;
+    box-shadow: 0 0 10px rgba(255, 78, 80, 0.3);
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.errorlist {
+    color: #d32f2f;
+    list-style: none;
+    margin-top: 5px;
+    margin-bottom: -15px;
+    font-size: 0.9rem;
+}
+
+/* Карточки цитат (top.html) */
+.quote-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 25px 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.quote-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+/* Фоновые градиенты для разных страниц */
+body.home {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+}
+
+body.add {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #ffecd2, #fcb69f);
+}
+
+body.top {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+}

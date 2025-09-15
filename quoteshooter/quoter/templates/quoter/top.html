@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Топ {{ num_id }} цитат - Quote Shooter</title>
+    <link rel="stylesheet" href="{% static 'quoter/css/styles.css' %}">
+</head>
+<body class="top">
+    <div class="container">
+        <h1>🔥 Топ {{ num_id }} цитат по просмотрам</h1>
+
+        {% if quotes %}
+            {% for q in quotes %}
+                <div class="quote-card">
+                    <div class="quote-text">{{ q.text }}</div>
+                    <div class="quote-source">— {{ q.source }}</div>
+                    <div class="quote-stats">
+                        <div class="stat">👁 {{ q.views_cnt }}</div>
+                        <div class="stat">👍 {{ q.likes }}</div>
+                        <div class="stat">👎 {{ q.dislike }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align:center;">Цитат пока нет 😢</p>
+        {% endif %}
+
+        <a href="{% url 'home' %}" class="back-link">← Вернуться на главную</a>
+    </div>
+</body>
+</html>

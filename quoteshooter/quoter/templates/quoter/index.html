@@ -1,0 +1,42 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quote Shooter</title>
+    <link rel="stylesheet" href="{% static 'quoter/css/styles.css' %}">
+</head>
+<body class="home">
+    <div class="container">
+        <h1>Привет! Добро пожаловать в Quote Shooter 🚀</h1>
+
+        {% if quote %}
+            <div class="quote">{{ quote.text }}</div>
+            <div class="source">— {{ quote.source }}</div>
+
+            <div style="margin-top: 20px;">
+                <form method="post" action="{% url 'like_quote' quote.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">
+                        👍 {{ quote.likes }}
+                    </button>
+                </form>
+
+                <form method="post" action="{% url 'dislike_quote' quote.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">
+                        👎 {{ quote.dislikes }}
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <div class="quote">Цитат пока нет 😢</div>
+        {% endif %}
+
+        <div style="margin-top: 25px;">
+            <a href="{% url 'add' %}" class="btn-link btn">Добавить свою цитату</a>
+        </div>
+    </div>
+</body>
+</html>

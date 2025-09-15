@@ -1,0 +1,34 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить цитату - Quote Shooter</title>
+    <link rel="stylesheet" href="{% static 'quoter/css/styles.css' %}">
+</head>
+<body class="add">
+    <div class="container">
+        <h1>Добавить новую цитату 🚀</h1>
+        <form method="post">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn">Сохранить</button>
+        </form>
+
+        <a href="{% url 'home' %}" class="back-link">← Вернуться на главную</a>
+    </div>
+</body>
+</html>
