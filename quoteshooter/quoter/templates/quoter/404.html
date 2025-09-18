@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — Quote Shooter</title>
+    <link rel="stylesheet" href="{% static 'quoter/css/styles.css' %}">
+</head>
+<body class="top">
+    <div class="container">
+        <h1>😵 Ошибка 404</h1>
+        <p style="text-align:center; font-size:1.2rem; margin: 20px 0;">
+            Упс... страница не найдена.
+        </p>
+        <div class="quote-card">
+            <div class="quote-text">«Я че знаю, я тоже особо ниче не знаю»</div>
+            <div class="quote-source">— jw_mans</div>
+        </div>
+        <a href="{% url 'home' %}" class="back-link">← Вернуться на главную</a>
+    </div>
+</body>
+</html>

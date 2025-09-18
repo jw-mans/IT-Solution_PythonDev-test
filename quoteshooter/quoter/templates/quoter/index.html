@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="ru">
@@ -15,18 +16,22 @@
             <div class="quote">{{ quote.text }}</div>
             <div class="source">— {{ quote.source }}</div>
 
+            <div class="quote-stats" style="margin-top: 10px;">
+                <div class="stat">👁 {{ quote.views_cnt }}</div>
+            </div>
+
             <div style="margin-top: 20px;">
-                <form method="post" action="{% url 'like_quote' quote.id %}" style="display:inline;">
+                <form class="like-form" data-id="{{ quote.id }}" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn">
-                        👍 {{ quote.likes }}
+                        👍 <span class="like-count">{{ quote.likes }}</span>
                     </button>
                 </form>
 
-                <form method="post" action="{% url 'dislike_quote' quote.id %}" style="display:inline;">
+                <form class="dislike-form" data-id="{{ quote.id }}" style="display:inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn">
-                        👎 {{ quote.dislikes }}
+                        👎 <span class="dislike-count">{{ quote.dislikes }}</span>
                     </button>
                 </form>
             </div>
@@ -38,5 +43,7 @@
             <a href="{% url 'add' %}" class="btn-link btn">Добавить свою цитату</a>
         </div>
     </div>
+
+    <script src="{% static 'quoter/js/votes.js' %}"></script>
 </body>
 </html>
