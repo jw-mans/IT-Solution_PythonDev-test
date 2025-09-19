@@ -19,7 +19,7 @@
 
         {% if quotes %}
             {% for q in quotes %}
-                {% include 'quoter/snippets/quote_card.html' with quote=q %}
+                {% include 'quoter/snippets/quote_card_top.html' with quote=q %}
             {% endfor %}
         {% else %}
             <p style="text-align:center;">Цитат пока нет 😢</p>

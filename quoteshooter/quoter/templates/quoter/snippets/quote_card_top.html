@@ -1,0 +1,20 @@
+<div class="quote-card" data-id="{{ quote.id }}">
+    <div class="quote-text">{{ quote.text }}</div>
+    <div class="quote-source">— {{ quote.source }}</div>
+
+    <div class="quote-stats mt-2 flex items-center gap-4">
+        <div class="stat">👁 {{ quote.views_cnt }}</div>
+    </div>
+
+    <div class="mt-2" style="display:flex; justify-content:center; gap:12px;">
+        <form class="like-form" data-id="{{ quote.id }}" style="display:inline-flex; margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="btn">👍 <span class="like-count">{{ quote.likes }}</span></button>
+        </form>
+
+        <form class="dislike-form" data-id="{{ quote.id }}" style="display:inline-flex; margin:0;">
+            {% csrf_token %}
+            <button type="submit" class="btn">👎 <span class="dislike-count">{{ quote.dislikes }}</span></button>
+        </form>
+    </div>
+</div>
