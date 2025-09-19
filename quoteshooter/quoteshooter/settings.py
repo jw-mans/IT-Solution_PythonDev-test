@@ -6,9 +6,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
 SECRET_KEY = os.environ.get('SECRET_KEY')
-DEBUG = False
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
-USERNAME = os.environ.get('MYSQL_USER') # for MySQL PAW deploy
+DEBUG = True
+HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -52,10 +51,10 @@ WSGI_APPLICATION = 'quoteshooter.wsgi.application'
 DATABASES = {
     # sqlite3: локальный режим, дебаг
 
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': BASE_DIR / 'db.sqlite3',
-    # }
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 
     # postgres: в докере
 
@@ -68,14 +67,6 @@ DATABASES = {
     #     "PORT": os.environ.get("DB_PORT", 5432),
     # }
 
-    'default': {
-        'ENGINE': 'mysql.connector.django', #'django.db.backends.mysql',
-        'NAME': os.environ.get('MYSQL_DB'),
-        'USER': os.environ.get('MYSQL_USER'),
-        'PASSWORD': os.environ.get('MYSQL_PASSWORD'),
-        'HOST': os.environ.get('MYSQL_HOST'),
-        'PORT': '3306',
-    }
 }
 
 

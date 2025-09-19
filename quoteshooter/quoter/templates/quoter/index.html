@@ -6,26 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quote Shooter</title>
     <link rel="stylesheet" href="{% static 'quoter/css/styles.css' %}">
-    <style>
-        /* Кнопки в правом верхнем углу */
-        .top-right-buttons {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            z-index: 1000;
-        }
-    </style>
 </head>
 <body class="home">
-    <div class="top-right-buttons">
-        <button id="next-quote" class="btn">➡ Дальше</button>
-        <a href="{% url 'top' 10 %}" class="btn">🏆 Топ-10 просмотров</a>
-        <a href="{% url 'top10_likes' %}" class="btn">❤️ Топ-10 лайков</a>
-    </div>
-
     <div class="container">
+        <div class="top-buttons">
+            <button id="next-quote" class="btn">➡ Дальше</button>
+            <a href="{% url 'top' 10 %}" class="btn">🏆 Топ-10 просмотров</a>
+            <a href="{% url 'top10_likes' %}" class="btn">❤️ Топ-10 лайков</a>
+        </div>
+
         <h1>Привет! Добро пожаловать в Quote Shooter 🚀</h1>
 
         {% if quote %}
@@ -41,5 +30,6 @@
 
     <script src="{% static 'quoter/js/votes.js' %}"></script>
     <script src="{% static 'quoter/js/next_quote.js' %}"></script>
+    <script src="{% static 'quoter/js/weights.js' %}"></script>
 </body>
 </html>

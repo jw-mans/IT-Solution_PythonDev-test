@@ -3,6 +3,8 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 
+import json
+
 from .models import Quote
 from .forms import QuoteForm
 from .utils.vote_actions import like_quote, dislike_quote
@@ -38,7 +40,8 @@ def api_random_quote(request):
                 'source': str(quote.source),
                 'views_cnt': quote.views_cnt,
                 'likes': quote.likes,
-                'dislikes': quote.dislikes
+                'dislikes': quote.dislikes,
+                'weight': float(quote.weight)
             }
         }
         logger.info(f'API вернул цитату: {quote.id}')
@@ -135,7 +138,7 @@ def add_new(request):
 
                 logger.exception(f'Непредвиденная ошибка при сохранении цитаты: {e}')
                 form.add_error(None, 'Непредвиденная ошибка при сохранении цитаты. Повторите попытку позже.')
-                
+
             else:
                 logger.info(f'Добавлена новая цитата.')
                 return redirect('home')
@@ -145,34 +148,6 @@ def add_new(request):
         form = QuoteForm()
 
     return render(request, 'quoter/add.html', {'form': form})
-
-# def add_new(request):
-#     """
-#     Добавление новой цитаты через форму.
-
-#     Логика:
-#         1. Если метод POST:
-#             - Создает форму с POST-данными.
-#             - Если форма валидна, сохраняет Quote и редиректит на главную.
-#         2. Если метод GET:
-#             - Создает пустую форму.
-#         3. Рендерит шаблон 'quoter/add.html' с формой.
-
-#     Returns:
-#         HttpResponse: рендер шаблона с формой.
-#     """
-#     if request.method == "POST":
-#         form = QuoteForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             logger.info(f'Добавлена новая цитата.')
-#             return redirect('home')
-#         else:
-#             logger.warning('Ошибка валидации формы добавления цитаты')
-#     else:
-#         form = QuoteForm()
-
-#     return render(request, 'quoter/add.html', {'form': form})
 
 @require_POST
 def like(request, quote_id):
@@ -203,3 +178,22 @@ def dislike(request, quote_id):
     """
     logger.info(f'Дизлайк для цитаты {quote_id}')
     return dislike_quote(request, quote_id)
+
+@require_POST
+def update_weight(request, quote_id):
+    try:
+        data = json.loads(request.body)
+        new_weight = float(data.get("weight", 0))
+        if not (0 <= new_weight <= 100):
+            return JsonResponse({"success": False, "error": "Вес должен быть от 0 до 100."})
+
+        quote = Quote.objects.get(pk=quote_id)
+        quote.weight = new_weight
+        quote.save(update_fields=["weight"])
+        logger.info(f"Вес цитаты {quote.id} изменён на {new_weight:.2f}")
+        return JsonResponse({"success": True, "weight": new_weight})
+    except Quote.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Цитата не найдена."})
+    except Exception as e:
+        logger.exception(f"Ошибка при изменении веса: {e}")
+        return JsonResponse({"success": False, "error": "Ошибка на сервере."})

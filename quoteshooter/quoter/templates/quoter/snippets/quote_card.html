@@ -1,24 +1,31 @@
-<div class="quote-card">
+<div class="quote-card" data-id="{{ quote.id }}">
     <div class="quote-text">{{ quote.text }}</div>
     <div class="quote-source">— {{ quote.source }}</div>
 
-    <div class="quote-stats" style="margin-top: 10px;">
+    <div class="quote-stats mt-2 flex items-center gap-4">
         <div class="stat">👁 {{ quote.views_cnt }}</div>
+
+        <div class="stat flex items-center gap-1">
+            <span class="weight-icon">⚖</span>
+            <input type="number" class="weight-input hidden w-16 border rounded px-1 text-sm"
+                   step="0.1" value="{{ quote.weight|floatformat:2 }}">
+            <button class="edit-weight-btn text-sm text-blue-500">✏️</button>
+            <button class="save-weight-btn text-sm text-green-600 hidden">💾</button>
+            <button class="cancel-weight-btn text-sm text-red-500 hidden">✖</button>
+        </div>
     </div>
 
-    <div style="margin-top: 10px;">
-        <form class="like-form" data-id="{{ quote.id }}" style="display:inline;">
+    <div class="weight-error text-red-500 text-sm hidden mt-1"></div>
+
+    <div class="mt-2" style="display:flex; justify-content:center; gap:12px;">
+        <form class="like-form" data-id="{{ quote.id }}" style="display:inline-flex; margin:0;">
             {% csrf_token %}
-            <button type="submit" class="btn">
-                👍 <span class="like-count">{{ quote.likes }}</span>
-            </button>
+            <button type="submit" class="btn">👍 <span class="like-count">{{ quote.likes }}</span></button>
         </form>
 
-        <form class="dislike-form" data-id="{{ quote.id }}" style="display:inline;">
+        <form class="dislike-form" data-id="{{ quote.id }}" style="display:inline-flex; margin:0;">
             {% csrf_token %}
-            <button type="submit" class="btn">
-                👎 <span class="dislike-count">{{ quote.dislikes }}</span>
-            </button>
+            <button type="submit" class="btn">👎 <span class="dislike-count">{{ quote.dislikes }}</span></button>
         </form>
     </div>
 </div>

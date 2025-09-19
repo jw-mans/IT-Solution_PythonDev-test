@@ -10,7 +10,8 @@ urlpatterns = [
     path('add/', views.add_new, name='add'),
     path('like/<int:quote_id>', views.like, name='like_quote'),
     path('dislike/<int:quote_id>', views.dislike, name='dislike_quote'),
-    path('api/quote/random/', views.api_random_quote, name='api_random_quote')
+    path('api/quote/random/', views.api_random_quote, name='api_random_quote'),
+    path("quotes/<int:quote_id>/update_weight/", views.update_weight, name="update_weight"),
 ]
 
 handler404 = views.page_not_found

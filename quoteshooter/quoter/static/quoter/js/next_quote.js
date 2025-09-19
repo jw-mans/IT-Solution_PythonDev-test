@@ -2,8 +2,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const nextBtn = document.getElementById('next-quote');
     if (!nextBtn) return;
 
+    async function updateQuoteCard(quoteData) {
+        const card = document.querySelector('.quote-card');
+        if (!card) return;
+
+        card.querySelector('.quote-text').textContent = quoteData.text;
+        card.querySelector('.quote-source').textContent = '— ' + quoteData.source;
+        card.querySelector('.stat').textContent = '👁 ' + quoteData.views_cnt;
+        card.querySelector('.like-count').textContent = quoteData.likes;
+        card.querySelector('.dislike-count').textContent = quoteData.dislikes;
+
+        card.querySelector('.like-form').dataset.id = quoteData.id;
+        card.querySelector('.dislike-form').dataset.id = quoteData.id;
+
+        const weightInput = card.querySelector('.weight-input');
+        const weightIcon = card.querySelector('.weight-icon');
+        const editBtn = card.querySelector('.edit-weight-btn');
+        const saveBtn = card.querySelector('.save-weight-btn');
+        const cancelBtn = card.querySelector('.cancel-weight-btn');
+        const errorDiv = card.querySelector('.weight-error');
+
+        const weight = parseFloat(quoteData.weight);
+        const displayWeight = !isNaN(weight) ? weight.toFixed(2) : "0.00";
+
+        if (weightInput) {
+            weightInput.value = displayWeight;
+            weightInput.defaultValue = displayWeight;
+            weightInput.classList.add('hidden');
+        }
+
+        if (weightIcon) {
+            weightIcon.textContent = `⚖ ${displayWeight}`;
+            weightIcon.classList.remove('hidden');
+        }
+
+        if (editBtn) editBtn.classList.remove('hidden');
+        if (saveBtn) saveBtn.classList.add('hidden');
+        if (cancelBtn) cancelBtn.classList.add('hidden');
+
+        if (errorDiv) {
+            errorDiv.classList.add('hidden');
+            errorDiv.textContent = '';
+        }
+    }
+
     nextBtn.addEventListener('click', async () => {
         nextBtn.disabled = true;
+
         try {
             const res = await fetch('/api/quote/random/');
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -14,25 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const q = payload.quote;
-            const card = document.querySelector('.quote-card');
-            if (!card) throw new Error('Карточка цитаты не найдена в DOM');
+            await updateQuoteCard(payload.quote);
 
-            const textEl = card.querySelector('.quote-text');
-            const sourceEl = card.querySelector('.quote-source');
-            const statEl = card.querySelector('.stat');
-            const likeCountEl = card.querySelector('.like-count');
-            const dislikeCountEl = card.querySelector('.dislike-count');
-            const likeForm = card.querySelector('.like-form');
-            const dislikeForm = card.querySelector('.dislike-form');
-
-            if (textEl) textEl.textContent = q.text;
-            if (sourceEl) sourceEl.textContent = '— ' + q.source;
-            if (statEl) statEl.textContent = '👁 ' + q.views_cnt;
-            if (likeCountEl) likeCountEl.textContent = q.likes;
-            if (dislikeCountEl) dislikeCountEl.textContent = q.dislikes;
-            if (likeForm) likeForm.setAttribute('data-id', q.id);
-            if (dislikeForm) dislikeForm.setAttribute('data-id', q.id);
         } catch (err) {
             console.error('Ошибка при получении случайной цитаты:', err);
             alert('Ошибка при получении цитаты. Смотри консоль разработчика.');

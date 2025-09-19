@@ -1,54 +1,43 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-
 from .models import Quote, Source
 from core.logger import logger
+import random
 
 class QuoteForm(forms.ModelForm):
-    """
-    Форма для добавления новой цитаты.
-
-    Поля формы:
-        author (str): Автор цитаты (необязательное поле).
-        name (str): Название цитаты/произведения (необязательное поле).
-        text (str): Текст цитаты (обязательное поле).
-    """
-    author = forms.CharField(
-        max_length=255,
+    author = forms.CharField(max_length=255, required=False, label='Автор')
+    name = forms.CharField(max_length=255, required=False, label='Название')
+    text = forms.CharField(widget=forms.Textarea, label='Текст')
+    weight = forms.FloatField(
+        label='Вес (0-100)',
         required=False,
-        label='Автор'
-    )
-    name = forms.CharField(
-        max_length=255,
-        required=False,
-        label='Название'
-    )
-    text = forms.CharField(
-        widget=forms.Textarea,
-        label='Текст'
+        min_value=0.0,
+        max_value=100.0,
+        help_text='Чем выше вес, тем больше шанс цитаты появиться на главной'
     )
 
     class Meta:
         model = Quote
-        fields = ['author', 'name', 'text']
+        fields = ['author', 'name', 'text', 'weight']
 
     def clean_text(self):
-        """
-        Просто очищаем текст (убираем лишние пробелы).
-        """
         _text = self.cleaned_data.get('text', '').strip()
         if not _text:
             raise forms.ValidationError('Поле "Текст" не может быть пустым.')
         return _text
 
+    def clean_weight(self):
+        w = self.cleaned_data.get('weight')
+        if w in (None, ''):
+            w = random.uniform(0.0, 100.0)
+            logger.info(f'Присвоен случайный вес через форму: {w:.2f}')
+        return float(w)
+
     def clean(self):
         cleaned = super().clean()
-
         author = (cleaned.get('author') or '').strip()
         name = (cleaned.get('name') or '').strip()
         text = (cleaned.get('text') or '').strip()
-
         src_text = f'{author} "{name}"' if author and name else name or author or "Неизвестно"
 
         if text:
@@ -71,20 +60,14 @@ class QuoteForm(forms.ModelForm):
         cleaned['name'] = name
         cleaned['text'] = text
         cleaned['src_text'] = src_text
-
         return cleaned
 
-
-
     def save(self, commit=True):
-        """
-        Сохраняет объект Quote.
-        Когда форма уже валидна, создаём/получаем Source и сохраняем Quote.
-        """
         quote = super().save(commit=False)
 
         author = self.cleaned_data.get('author', '')
         name = self.cleaned_data.get('name', '')
+        quote.weight = self.cleaned_data.get('weight')
 
         try:
             quote.source = Quote.make_source(author, name)
