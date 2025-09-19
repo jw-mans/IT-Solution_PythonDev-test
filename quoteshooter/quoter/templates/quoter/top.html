@@ -10,39 +10,15 @@
 </head>
 <body class="top">
     <div class="container">
-        <h1>🔥 Топ {{ num_id }} цитат по просмотрам</h1>
+        <h1>{{ title_icon }} {{ title_text }}</h1>
 
         {% if quotes %}
             {% for q in quotes %}
-                <div class="quote-card">
-                    <div class="quote-text">{{ q.text }}</div>
-                    <div class="quote-source">— {{ q.source }}</div>
-
-                    <div class="quote-stats">
-                        <div class="stat">👁 {{ q.views_cnt }}</div>
-                    </div>
-
-                    <div style="margin-top: 10px;">
-                        <form class="like-form" data-id="{{ q.id }}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn">
-                                👍 <span class="like-count">{{ q.likes }}</span>
-                            </button>
-                        </form>
-
-                        <form class="dislike-form" data-id="{{ q.id }}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn">
-                                👎 <span class="dislike-count">{{ q.dislikes }}</span>
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                {% include 'quoter/snippets/quote_card.html' with quote=q %}
             {% endfor %}
         {% else %}
             <p style="text-align:center;">Цитат пока нет 😢</p>
         {% endif %}
-
         <a href="{% url 'home' %}" class="back-link">← Вернуться на главную</a>
     </div>
 

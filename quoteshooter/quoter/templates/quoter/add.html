@@ -12,21 +12,29 @@
         <h1>Добавить новую цитату 🚀</h1>
         <form method="post">
             {% csrf_token %}
+
             {% for field in form %}
                 <div class="field">
                     {{ field.label_tag }}
                     {{ field }}
-                    {% if field.errors %}
-                        <ul class="errorlist">
-                            {% for error in field.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
                 </div>
             {% endfor %}
+
             <button type="submit" class="btn">Сохранить</button>
+
+            {% if form.errors %}
+                <div class="all-errors">
+                    <ul class="errorlist">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
         </form>
+
 
         <a href="{% url 'home' %}" class="back-link">← Вернуться на главную</a>
     </div>

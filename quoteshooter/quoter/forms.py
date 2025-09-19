@@ -1,5 +1,9 @@
 from django import forms
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
+
 from .models import Quote, Source
+from core.logger import logger
 
 class QuoteForm(forms.ModelForm):
     """
@@ -31,52 +35,65 @@ class QuoteForm(forms.ModelForm):
 
     def clean_text(self):
         """
-        Проверка уникальности текста цитаты без учёта регистра.
-        
-        Raises:
-            forms.ValidationError: если цитата уже существует в базе.
-        
-        Returns:
-            str: очищенный текст цитаты.
+        Просто очищаем текст (убираем лишние пробелы).
         """
-        _text = self.cleaned_data['text'].strip()
-        if Quote.objects.filter(text__iexact=_text).exists():
-            raise forms.ValidationError('Цитата уже существует.')
+        _text = self.cleaned_data.get('text', '').strip()
+        if not _text:
+            raise forms.ValidationError('Поле "Текст" не может быть пустым.')
         return _text
-        
+
+    def clean(self):
+        cleaned = super().clean()
+
+        author = (cleaned.get('author') or '').strip()
+        name = (cleaned.get('name') or '').strip()
+        text = (cleaned.get('text') or '').strip()
+
+        src_text = f'{author} "{name}"' if author and name else name or author or "Неизвестно"
+
+        if text:
+            dup = Quote.objects.filter(
+                text__iexact=text,
+                source__data__iexact=src_text
+            ).exists()
+            if dup:
+                self.add_error('text', 'Такая цитата уже существует для этого источника.')
+
+        src_qs = Source.objects.filter(data__iexact=src_text)
+        if src_qs.exists():
+            src_obj = src_qs.first()
+            if (src_obj.data or '').strip().lower() != 'неизвестно':
+                count = Quote.objects.filter(source=src_obj).count()
+                if count >= 3:
+                    self.add_error(None, f'У источника "{src_text}" уже {count} цитаты. Нельзя добавить больше 3.')
+
+        cleaned['author'] = author
+        cleaned['name'] = name
+        cleaned['text'] = text
+        cleaned['src_text'] = src_text
+
+        return cleaned
+
+
+
     def save(self, commit=True):
         """
         Сохраняет объект Quote.
-
-        Логика:
-            1. Формируем поле source на основе введённых author и name.
-               Возможные варианты:
-                 - <Автор> "<Название>"
-                 - "<Название>"
-                 - <Автор>
-                 - "Неизвестно" (если пусто)
-            2. Создаём или получаем объект Source.
-            3. Присваиваем source объекту Quote.
-            4. Сохраняем Quote (если commit=True).
-
-        Args:
-            commit (bool): если True, сразу сохраняем объект в БД.
-
-        Returns:
-            Quote: сохранённый объект цитаты.
+        Когда форма уже валидна, создаём/получаем Source и сохраняем Quote.
         """
         quote = super().save(commit=False)
 
-        author = self.cleaned_data.get('author', '').strip()
-        name = self.cleaned_data.get('name', '').strip()
+        author = self.cleaned_data.get('author', '')
+        name = self.cleaned_data.get('name', '')
 
-        # Формируем текст источника
-        src_text = f'{author} "{name}"' if author and name \
-            else name or author or "Неизвестно"
-        src_obj = Source.objects.get_or_create(data=src_text)[0]
-        quote.source = src_obj
-                
+        try:
+            quote.source = Quote.make_source(author, name)
+        except Exception as e:
+            logger.error(f'Ошибка при создании источника для цитаты: {e}')
+            raise ValidationError('Ошибка при создании/получении источника.')
+
         if commit:
             quote.save()
 
+        logger.info(f'Цитата успешно сохранена через форму: {quote.id}')
         return quote

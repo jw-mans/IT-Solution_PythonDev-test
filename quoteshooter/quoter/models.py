@@ -3,6 +3,8 @@ from django.db.models import F, Sum
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+from core.logger import logger
+
 class Source(models.Model):
     """Модель источника цитаты."""
     data = models.CharField(max_length=511, unique=True)
@@ -16,7 +18,10 @@ class Source(models.Model):
         Возвращает объект Source по умолчанию.
         Если его нет в базе, создаёт новый с data="Неизвестно".
         """
-        return cls.objects.get_or_create(data="Неизвестно")[0]
+        obj, create_flag = cls.objects.get_or_create(data="Неизвестно")
+        if create_flag:
+            logger.info(f'Создан новый источник по умолчанию: {obj}')
+        return obj
     
 class Quote(models.Model):
     """Модель цитаты.
@@ -65,7 +70,7 @@ class Quote(models.Model):
             # для ручного добавления в БД
             models.CheckConstraint(
                 check=models.Q(weight__gte=0.0) & \
-                      models.Q(weight_lte=100.0),
+                      models.Q(weight__lte=100.0),
                 name='weight_1_and_100_bounds'
             )
         ]
@@ -73,11 +78,17 @@ class Quote(models.Model):
     def clean(self):
         """
         Проверка перед сохранением.
-        Ограничение: не более 3 цитат на один источник.
+        Ограничение: не более 3 цитат на один источник,
+        исключение: для источника "Неизвестно" ограничение НЕ применяется.
         """
         if self.pk is None:
+            src_data = (getattr(self.source, 'data', '') or '').strip().lower()
+            if src_data == 'неизвестно':
+                return
+
             existing = Quote.objects.filter(source=self.source).count()
             if existing >= 3:
+                logger.warning(f'Невозможно создать цитату: источник {self.source} уже имеет {existing} цитаты.')
                 raise ValidationError(
                     f"Source already has {existing} quotes, no more than 3!"
                 )
@@ -97,7 +108,6 @@ class Quote(models.Model):
             Quote | None: Случайная цитата или None, если база пуста.
         """
         
-        #Возвращает один экземпляр Quote с учётом веса (W).
         #Реализация на стороне Python — приемлема для небольших пулов.
         #Для огромных данных можно сделать выборку в БД.
 
@@ -105,6 +115,7 @@ class Quote(models.Model):
         #1) A: W(A)=2
         #2) B: W(B)=5
         #3) C: W(C)=8
+        #W(<цитата>) - вес цитаты
 
         #Тогда:
         #quotes = [A, B, C]
@@ -139,6 +150,7 @@ class Quote(models.Model):
         )['total'] or EMPTY_QUOTES_LIST_WEIGHT # если цитат нет
 
         if total_weight == EMPTY_QUOTES_LIST_WEIGHT:
+            logger.info('Нет цитат для случайного выбора.')
             return None 
         
         __random_cumul_weight = random.uniform(0.0, total_weight)
@@ -146,8 +158,10 @@ class Quote(models.Model):
         for _q in __quotes:
             __cumul += _q.weight
             if __random_cumul_weight <= __cumul:
+                logger.info(f'Выбрана случайная цитата: {_q.id}')
                 return _q
             
+        logger.info(f'Выбрана последняя цитата: {__quotes.last().id}')
         return __quotes.last()
     
     def __atomar(self, **kwargs):
@@ -164,6 +178,7 @@ class Quote(models.Model):
         Увеличивает счетчик просмотров на 1 атомарно.
         """
         self.__atomar(views_cnt=F('views_cnt') + 1)
+        logger.info(f'Увеличен счетчик просмотров цитаты {self.id}: {self.views_cnt + 1}')
 
     def save(self, *args, **kwargs):
         """
@@ -177,8 +192,10 @@ class Quote(models.Model):
         import random
         if self.pk is None and self.weight == 0.0:
             self.weight = random.uniform(0.0, 100.0)
+            logger.info(f'Присвоен случайный вес цитате: {self.weight:.2f}')
             
         super().save(*args, **kwargs)
+        logger.info(f'Сохранена цитата {self.id}: "{self.text[:30]}..."')
 
     def __str__(self):
         """
@@ -186,3 +203,25 @@ class Quote(models.Model):
         первые 50 символов текста + источник.
         """
         return f'"{self.text[:50]}...": {self.source}'
+    
+    @staticmethod
+    def make_source(author, name):
+        """
+        Формирует объект Source по автору и названию произведения.
+
+        Правила:
+            - <Автор> "<Название>"
+            - "<Название>"
+            - <Автор>
+            - "Неизвестно" (если оба поля пустые)
+
+        Args:
+            author (str): Автор цитаты
+            str (str): Название источника
+        """
+        author, name = author.strip(), name.strip()
+        src_text = f'{author} "{name}"' if author and name else name or author or "Неизвестно"
+        obj, create_flag = Source.objects.get_or_create(data=src_text)
+        if create_flag:
+            logger.info(f'Создан источник: {obj}')
+        return obj
