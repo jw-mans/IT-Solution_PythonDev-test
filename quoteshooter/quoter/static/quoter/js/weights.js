@@ -8,7 +8,6 @@ function setupWeightHandlers(card) {
 
     if (!weightInput || !weightIcon || !editBtn || !saveBtn || !cancelBtn) return;
 
-    // Сбрасываем вид кнопок и input
     weightInput.classList.add('hidden');
     weightIcon.classList.remove('hidden');
     editBtn.classList.remove('hidden');
@@ -16,12 +15,10 @@ function setupWeightHandlers(card) {
     cancelBtn.classList.add('hidden');
     errorDiv.classList.add('hidden');
 
-    // Удаляем старые обработчики (если есть)
     editBtn.onclick = null;
     saveBtn.onclick = null;
     cancelBtn.onclick = null;
 
-    // Привязываем новые
     editBtn.addEventListener('click', () => {
         weightInput.classList.remove('hidden');
         weightIcon.classList.add('hidden');
@@ -79,5 +76,4 @@ function setupWeightHandlers(card) {
     });
 }
 
-// Инициализация для всех карточек на странице
 document.querySelectorAll('.quote-card').forEach(card => setupWeightHandlers(card));
